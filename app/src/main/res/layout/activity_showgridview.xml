@@ -12,7 +12,7 @@
         android:layout_height="400dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:layout_marginStart="100dp"
+        android:layout_marginStart="70dp"
         android:layout_marginTop="200dp"
         android:translationX="10dp"
         android:translationY="10dp" />

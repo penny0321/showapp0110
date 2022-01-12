@@ -8,20 +8,23 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
+
 public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
-    private String[] mData;
-    private Drawable[] mLogos ;
-    private String[] mPackageData;
+    private ArrayList<String> mData= new ArrayList<>();
+    private ArrayList<String> mPackageData= new ArrayList<>();
+    private ArrayList<Drawable> mLogos= new ArrayList<>();
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
 
     // data is passed into the constructor
-    MyRecyclerViewAdapter(Context context, String[] data,Drawable[] icon,String[] PackageData) {
+    MyRecyclerViewAdapter(Context context, ArrayList<String> data,ArrayList<Drawable> icon,ArrayList<String> PackageData) {
         this.mInflater = LayoutInflater.from(context);
         this.mData = data;
         this.mLogos = icon;
@@ -39,25 +42,25 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     // binds the data to the TextView in each cell
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        if(mData[position].length()<14){
-            holder.myTextView.setText(mData[position]);
+        if(mData.get(position).length()<14){
+            holder.myTextView.setText(mData.get(position));
         }
         else{
-            holder.myTextView.setText(mData[position].substring(0,14)+"...");
+            holder.myTextView.setText(mData.get(position).substring(0,14)+"...");
         }
 
-        holder.myLogoView.setImageDrawable(mLogos[position]);
+        holder.myLogoView.setImageDrawable(mLogos.get(position));
     }
 
     // total number of cells
     @Override
     public int getItemCount() {
-        return mData.length;
+        return mData.size();
     }
 
 
     // stores and recycles views as they are scrolled off screen
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class ViewHolder extends RecyclerView.ViewHolder{
         TextView myTextView;
         ImageView myLogoView;
 
@@ -65,22 +68,31 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
             super(itemView);
             myTextView = itemView.findViewById(R.id.info_text);
             myLogoView = itemView.findViewById(R.id.imgV);
-            itemView.setOnClickListener(this);
-        }
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mClickListener.onItemClick(v, getAdapterPosition());
+                }
+            });
 
-        @Override
-        public void onClick(View view) {
-            if (mClickListener != null) mClickListener.onItemClick(view, getAdapterPosition());
+            //Long Press
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    mClickListener.onItemLongClick(v,getAdapterPosition());
+                    return false;
+                }
+            });
         }
     }
 
     // convenience method for getting data at click position
     String getItemname(int id) {
-        return mData[id];
+        return mData.get(id);
     }
 
     String getItempackagename(int id) {
-        return mPackageData[id];
+        return mPackageData.get(id);
     }
 
     // allows clicks events to be caught
@@ -91,6 +103,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     // parent activity will implement this method to respond to click events
     public interface ItemClickListener {
         void onItemClick(View view, int position);
+        void onItemLongClick(View view, int position);
     }
 }
 
