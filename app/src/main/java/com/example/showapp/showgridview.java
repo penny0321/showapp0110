@@ -10,14 +10,18 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,11 +31,13 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public class showgridview extends AppCompatActivity implements MyRecyclerViewAdapter.ItemClickListener {
 
     MyRecyclerViewAdapter adapter;
     private PackageManager pm;
+    private SharedPreferences rememberUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,6 +138,10 @@ public class showgridview extends AppCompatActivity implements MyRecyclerViewAda
     }
     @Override
     public void onItemLongClick(View view, int position) {
+        uninstallPackage(adapter.getItempackagename(position));
+    }
+    /*@Override
+    public void onItemLongClick(View view, int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(showgridview.this);
         builder.setTitle(adapter.getItemname(position));
         builder.setMessage("確定要刪除該應用程式?");
@@ -155,14 +165,58 @@ public class showgridview extends AppCompatActivity implements MyRecyclerViewAda
         //利用Builder物件建立AlertDialog
         builder.create();
         builder.show();
+    }*/
+
+    public void uninstallPackage(String packageName) {
+        Intent intent = new Intent(Intent.ACTION_DELETE);
+        intent.setData(Uri.parse("package:"+packageName));
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        this.startActivity(intent);
+
+        switchLanguage();
+
+        checkLanguage();
     }
 
-    private void uninstallPackage(String packageName) {
-        Intent intent = new Intent(this, this.getClass());
-        PendingIntent sender = PendingIntent.getActivity(this, 0, intent, 0);
-        PackageInstaller mPackageInstaller = this.getPackageManager().getPackageInstaller();
-        mPackageInstaller.uninstall(packageName, sender.getIntentSender());
+    /*protected void switchLanguage(){
+        Resources resources = this.getResources();
+        Configuration config = resources.getConfiguration();
+        DisplayMetrics dm = resources.getDisplayMetrics();
+        config.locale = Locale.TAIWAN;
+        resources.updateConfiguration(config,dm);
+
+        //儲存設置
+        rememberUser=getSharedPreferences("CHINESE",MODE_PRIVATE);
+    }*/
+
+    public void switchLanguage(){
+        Resources resources = this.getResources();
+        Configuration config = resources.getConfiguration();
+        DisplayMetrics dm = resources.getDisplayMetrics();
+        Locale locale = new Locale("zh", "tw");
+        config.setLocale(locale);
+        resources.updateConfiguration(config, dm);
     }
 
+    public void checkLanguage(){
+
+//這樣獲得的是操作系統的語言
+
+//獲得APP系統語言（中文-英文）
+
+        Resources res=getResources();
+
+        Configuration config=res.getConfiguration();
+
+        Locale locale=config.locale;
+
+        String displaylanguage=locale.getDisplayLanguage();//顯示語言（中文-英文）
+
+        String language=locale.getLanguage();//語言代號（zh-en）
+
+        Toast.makeText(getApplicationContext(), "LANGUAGE:"+language,Toast.LENGTH_LONG).show();
+
+
+    }
 
 }
